@@ -6,7 +6,7 @@ import 'fixed_deposit_page.dart';
 import 'beneficiary_page.dart';
 import 'manage_fixed_deposit_page.dart';
 import 'card_page.dart';
-
+import 'loan_page.dart';
 
 class HomePage extends StatelessWidget {
   final Color primaryBlue = Color(0xFF3B5EDF);
@@ -113,7 +113,9 @@ class HomePage extends StatelessWidget {
               }},
               {'label': 'Debit Card', 'icon': Icons.credit_card},
               {'label': 'Security', 'icon': Icons.security},
-              {'label': 'Passbook', 'icon': Icons.menu_book},
+              {'label': 'Loans', 'icon': Icons.menu_book, 'action': () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => LoanPage()));
+              }},
             ]),
             SizedBox(height: 16),
             _sectionTitle("Deposits"),
