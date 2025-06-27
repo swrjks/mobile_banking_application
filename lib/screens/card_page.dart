@@ -41,7 +41,9 @@ class _CardsPageState extends State<CardsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("My Cards"),
+        title: Text("My Cards", style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFF3B5EDF),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: ListView(
         padding: EdgeInsets.all(16),
@@ -60,7 +62,7 @@ class _CardsPageState extends State<CardsPage> {
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [Color(0xFF3B5EDF), Color(0xFF4C84EF)],
+                      colors: [Color(0xFF0A2342), Color(0xFF119DA4), Color(0xFF0C7489)],
                     ),
                     borderRadius: BorderRadius.circular(12),
                   ),

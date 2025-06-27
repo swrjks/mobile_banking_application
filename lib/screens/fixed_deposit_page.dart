@@ -7,10 +7,10 @@ class FixedDepositPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Fixed Deposits"),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
+        title: Text("Fixed Deposits",
+          style: TextStyle(color: Colors.white),),
+        backgroundColor: Color(0xFF3B5EDF),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class BeneficiaryPage extends StatefulWidget {
+class BeneficiariesPage extends StatefulWidget {
   @override
-  _BeneficiaryPageState createState() => _BeneficiaryPageState();
+  _BeneficiariesPageState createState() => _BeneficiariesPageState();
 }
 
-class _BeneficiaryPageState extends State<BeneficiaryPage> {
+class _BeneficiariesPageState extends State<BeneficiariesPage> {
   final List<Map<String, dynamic>> _beneficiaries = [
     {
       'id': '1',
@@ -142,7 +142,11 @@ class _BeneficiaryPageState extends State<BeneficiaryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Manage Beneficiaries"),
+        title: Text("Manage Beneficiaries",
+          style: TextStyle(color: Colors.white),),
+        backgroundColor: Color(0xFF3B5EDF),
+        iconTheme: IconThemeData(color: Colors.white),
+
       ),
       body: _beneficiaries.isEmpty
           ? Center(
@@ -209,8 +213,8 @@ class _BeneficiaryPageState extends State<BeneficiaryPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddDialog,
-        child: Icon(Icons.add, color: Colors.blue),
-        backgroundColor: Colors.white,
+        child: Icon(Icons.add, color: Colors.white),
+        backgroundColor: Color(0xFF3B5EDF),
         elevation: 4,
       ),
     );

@@ -17,7 +17,7 @@ class TransactionSuccessPage extends StatelessWidget {
     final currentTime = DateTime.now();
 
     return Scaffold(
-      backgroundColor: Color(0xFFF3F6FD),
+      backgroundColor: Colors.white54,
       body: Center(
         child: Card(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -43,8 +43,9 @@ class TransactionSuccessPage extends StatelessWidget {
                   onPressed: () {
                     Navigator.popUntil(context, (route) => route.isFirst);
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF3B5EDF)),
-                  child: Text("Done"),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  child: Text("Done",
+                    style: TextStyle(fontSize: 20, color: Colors.white),),
                 ),
               ],
             ),

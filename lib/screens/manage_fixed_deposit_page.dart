@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class ManageFixedDepositsPage extends StatefulWidget {
+class ManageDepositsPage extends StatefulWidget {
   @override
-  _ManageFixedDepositsPageState createState() => _ManageFixedDepositsPageState();
+  _ManageDepositsPageState createState() => _ManageDepositsPageState();
 }
 
-class _ManageFixedDepositsPageState extends State<ManageFixedDepositsPage> {
+class _ManageDepositsPageState extends State<ManageDepositsPage> {
   final List<Map<String, dynamic>> _fixedDeposits = [
     {
       'id': '1',
@@ -44,7 +44,10 @@ class _ManageFixedDepositsPageState extends State<ManageFixedDepositsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Manage Fixed Deposits"),
+        title: Text("Manage Fixed Deposits",
+          style: TextStyle(color: Colors.white),),
+        backgroundColor: Color(0xFF3B5EDF),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: ListView.builder(
         padding: EdgeInsets.all(16),
@@ -204,8 +207,8 @@ class _ManageFixedDepositsPageState extends State<ManageFixedDepositsPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
-        child: Icon(Icons.add, color: Colors.blue),
-        backgroundColor: Colors.white,
+        child: Icon(Icons.add, color: Colors.white),
+        backgroundColor: Color(0xFF3B5EDF),
         elevation: 4,
       ),
     );
