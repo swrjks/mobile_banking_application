@@ -1,5 +1,6 @@
-
 import 'package:flutter/material.dart';
+import 'add_loan_page.dart';
+import 'otp_verification_page.dart';
 
 class LoanPage extends StatefulWidget {
   @override
@@ -7,7 +8,7 @@ class LoanPage extends StatefulWidget {
 }
 
 class _LoanPageState extends State<LoanPage> {
-  final List<Map<String, dynamic>> _loans = [
+  List<Map<String, dynamic>> _loans = [
     {
       'id': '1',
       'type': 'Home Loan',
@@ -16,6 +17,7 @@ class _LoanPageState extends State<LoanPage> {
       'duration': '20 years',
       'remaining': '₹1,800,000',
       'icon': Icons.home,
+      'color': Colors.blue,
     },
     {
       'id': '2',
@@ -25,27 +27,10 @@ class _LoanPageState extends State<LoanPage> {
       'duration': '5 years',
       'remaining': '₹350,000',
       'icon': Icons.directions_car,
-    },
-    {
-      'id': '3',
-      'type': 'Education Loan',
-      'amount': '₹500,000',
-      'interest': '7.5%',
-      'duration': '10 years',
-      'remaining': '₹200,000',
-      'icon': Icons.school,
+      'color': Colors.green,
     },
   ];
 
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _typeController = TextEditingController();
-  final TextEditingController _amountController = TextEditingController();
-  final TextEditingController _interestController = TextEditingController();
-  final TextEditingController _durationController = TextEditingController();
-  final TextEditingController _remainingController = TextEditingController();
-  IconData _selectedIcon = Icons.credit_card;
-
-  // Method to get color based on loan type
   Color _getColorForLoanType(String type) {
     switch (type) {
       case 'Home Loan':
@@ -61,7 +46,6 @@ class _LoanPageState extends State<LoanPage> {
     }
   }
 
-  // Method to get icon based on loan type
   IconData _getIconForLoanType(String type) {
     switch (type) {
       case 'Home Loan':
@@ -77,116 +61,70 @@ class _LoanPageState extends State<LoanPage> {
     }
   }
 
-  @override
-  void dispose() {
-    _typeController.dispose();
-    _amountController.dispose();
-    _interestController.dispose();
-    _durationController.dispose();
-    _remainingController.dispose();
-    super.dispose();
-  }
+  Future<void> _addNewLoan() async {
+    // Step 1: Get new loan data from AddLoanPage
+    final newLoan = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddLoanPage(getIconForLoanType: _getIconForLoanType),
+      ),
+    );
 
-  void _addLoan() {
-    if (_formKey.currentState!.validate()) {
-      final loanType = _typeController.text;
-      setState(() {
-        _loans.add({
-          'id': DateTime.now().toString(),
-          'type': loanType,
-          'amount': _amountController.text,
-          'interest': _interestController.text,
-          'duration': _durationController.text,
-          'remaining': _remainingController.text,
-          'icon': _getIconForLoanType(loanType),
+    if (newLoan != null && mounted) {
+      // Step 2: Go to OTPVerificationPage
+      final otpVerified = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OTPVerificationPage(
+            // Pass any required info, e.g. phoneNumber, verificationId
+            onVerificationComplete: (otp) {
+              Navigator.of(context).pop(true); // Return true to indicate success
+            },
+            onResendCode: () {},
+            onCancel: () {
+              Navigator.of(context).pop(false); // Return false to indicate cancel
+            },
+          ),
+        ),
+      );
+
+      // Step 3: If OTP was verified, add the loan
+      if (otpVerified == true && mounted) {
+        setState(() {
+          _loans.add({
+            'id': DateTime.now().millisecondsSinceEpoch.toString(),
+            ...newLoan,
+            'color': _getColorForLoanType(newLoan['type']),
+          });
         });
 
-        // Clear form
-        _typeController.clear();
-        _amountController.clear();
-        _interestController.clear();
-        _durationController.clear();
-        _remainingController.clear();
-
-        // Close the add dialog
-        Navigator.of(context).pop();
-      });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${newLoan['type']} added successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     }
   }
 
-  void _deleteLoan(String id) {
-    setState(() {
-      _loans.removeWhere((loan) => loan['id'] == id);
-    });
-  }
-
-  void _showAddDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Add New Loan"),
-          content: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: _typeController,
-                    decoration: InputDecoration(labelText: "Loan Type"),
-                    validator: (value) => value!.isEmpty ? 'Required' : null,
-                  ),
-                  TextFormField(
-                    controller: _amountController,
-                    decoration: InputDecoration(labelText: "Loan Amount"),
-                    keyboardType: TextInputType.number,
-                    validator: (value) => value!.isEmpty ? 'Required' : null,
-                  ),
-                  TextFormField(
-                    controller: _interestController,
-                    decoration: InputDecoration(labelText: "Interest Rate"),
-                    keyboardType: TextInputType.number,
-                    validator: (value) => value!.isEmpty ? 'Required' : null,
-                  ),
-                  TextFormField(
-                    controller: _durationController,
-                    decoration: InputDecoration(labelText: "Duration"),
-                    validator: (value) => value!.isEmpty ? 'Required' : null,
-                  ),
-                  TextFormField(
-                    controller: _remainingController,
-                    decoration: InputDecoration(labelText: "Remaining Amount"),
-                    keyboardType: TextInputType.number,
-                    validator: (value) => value!.isEmpty ? 'Required' : null,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: _addLoan,
-              child: Text("Add"),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("My Loans",
-          style: TextStyle(color: Colors.white),),
+        title: Text("My Loans", style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF3B5EDF),
         iconTheme: IconThemeData(color: Colors.white),
+        actions: [
+          if (_loans.isNotEmpty)
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () {
+                // Implement search functionality
+              },
+            ),
+        ],
       ),
       body: _loans.isEmpty
           ? Center(
@@ -201,40 +139,92 @@ class _LoanPageState extends State<LoanPage> {
             ),
             SizedBox(height: 8),
             Text(
-              "Tap the + button to add a loan",
+              "Tap the + button to add loans",
               style: TextStyle(color: Colors.grey),
             ),
           ],
         ),
       )
-          : ListView.builder(
-        padding: EdgeInsets.all(16),
-        itemCount: _loans.length,
-        itemBuilder: (context, index) {
-          final loan = _loans[index];
-          final cardColor = _getColorForLoanType(loan['type']);
-
-          return Card(
-            margin: EdgeInsets.only(bottom: 16),
-            elevation: 4,
-            child: Padding(
+          : Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total Loans: ${_loans.length}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                Text(
+                  'Total Remaining: ₹${_calculateTotalRemaining()}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
               padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              itemCount: _loans.length,
+              itemBuilder: (context, index) {
+                final loan = _loans[index];
+                final cardColor = _getColorForLoanType(loan['type']);
+                return _buildLoanCard(loan, cardColor);
+              },
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addNewLoan,
+        child: Icon(Icons.add, color: Colors.white),
+        backgroundColor: Color(0xFF3B5EDF),
+        elevation: 4,
+        tooltip: 'Add New Loan',
+      ),
+    );
+  }
+
+  Widget _buildLoanCard(Map<String, dynamic> loan, Color cardColor) {
+    return Card(
+      margin: EdgeInsets.only(bottom: 16),
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          // Navigate to loan details page if needed
+        },
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      CircleAvatar(
+                        backgroundColor: cardColor.withOpacity(0.2),
+                        child: Icon(
+                          loan['icon'],
+                          color: cardColor,
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CircleAvatar(
-                            backgroundColor: cardColor.withOpacity(0.2),
-                            child: Icon(
-                              loan['icon'],
-                              color: cardColor,
-                            ),
-                          ),
-                          SizedBox(width: 16),
                           Text(
                             loan['type'],
                             style: TextStyle(
@@ -242,107 +232,107 @@ class _LoanPageState extends State<LoanPage> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ],
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _deleteLoan(loan['id']),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                          SizedBox(height: 4),
                           Text(
-                            "Amount",
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                          Text(
-                            loan['amount'],
+                            'Started ${_randomDate()} ago',
                             style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Interest",
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                          Text(
-                            loan['interest'],
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Duration",
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                          Text(
-                            loan['duration'],
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: Colors.grey,
                             ),
                           ),
                         ],
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
-                  Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(8),
+                  Icon(Icons.chevron_right, color: Colors.grey),
+                ],
+              ),
+              SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildLoanDetail('Amount', loan['amount']),
+                  _buildLoanDetail('Interest', loan['interest']),
+                  _buildLoanDetail('Duration', loan['duration']),
+                ],
+              ),
+              SizedBox(height: 16),
+              LinearProgressIndicator(
+                value: _calculateProgress(loan),
+                backgroundColor: Colors.grey[200],
+                valueColor: AlwaysStoppedAnimation<Color>(cardColor),
+              ),
+              SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Remaining',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[700],
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Remaining Amount",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                        Text(
-                          loan['remaining'],
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
-                          ),
-                        ),
-                      ],
+                  ),
+                  Text(
+                    loan['remaining'],
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
                     ),
                   ),
                 ],
               ),
-            ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddDialog,
-        child: Icon(Icons.add, color: Colors.white),
-        backgroundColor: Color(0xFF3B5EDF),
-        elevation: 4,
+            ],
+          ),
+        ),
       ),
     );
+  }
+
+  Widget _buildLoanDetail(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(color: Colors.grey),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  double _calculateProgress(Map<String, dynamic> loan) {
+    try {
+      final total = double.parse(loan['amount'].replaceAll(RegExp(r'[^0-9.]'), ''));
+      final remaining = double.parse(loan['remaining'].replaceAll(RegExp(r'[^0-9.]'), ''));
+      return (total - remaining) / total;
+    } catch (e) {
+      return 0.5;
+    }
+  }
+
+  String _randomDate() {
+    final months = ['3', '5', '8', '10', '15', '22'];
+    return '${months[DateTime.now().second % months.length]} months';
+  }
+
+  String _calculateTotalRemaining() {
+    try {
+      double total = 0;
+      for (var loan in _loans) {
+        total += double.parse(loan['remaining'].replaceAll(RegExp(r'[^0-9.]'), ''));
+      }
+      return total.toStringAsFixed(2).replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+    } catch (e) {
+      return '0';
+    }
   }
 }

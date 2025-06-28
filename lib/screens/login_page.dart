@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart';
-import '../widgets/pin_input.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -9,6 +8,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   String enteredPin = '';
+  final Color primaryBlue = Color(0xFF3B5EDF);
+  final Color lightBg = Color(0xFFF5F7FA);
 
   void onKeyTap(String value) {
     if (enteredPin.length < 5) {
@@ -34,7 +35,10 @@ class _LoginPageState extends State<LoginPage> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Incorrect PIN. Try 12345.')),
+        SnackBar(
+          content: Text('Incorrect PIN. Try 12345.'),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       setState(() {
         enteredPin = '';
@@ -42,113 +46,52 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Widget buildPinBox() {
+  Widget _buildPinIndicator() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(5, (index) {
         return Container(
           margin: EdgeInsets.symmetric(horizontal: 8),
-          padding: EdgeInsets.all(12),
+          width: 20,
+          height: 20,
           decoration: BoxDecoration(
-            shape: BoxShape.rectangle,
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            index < enteredPin.length ? '●' : '',
-            style: TextStyle(fontSize: 24),
+            shape: BoxShape.circle,
+            color: index < enteredPin.length ? primaryBlue : Colors.grey.shade200,
           ),
         );
       }),
     );
   }
 
-  Widget buildNumberPad() {
-    final keys = [
-      '1','2','3',
-      '4','5','6',
-      '7','8','9',
-      '','0','⌫',
-    ];
-    return GridView.builder(
-      shrinkWrap: true,
-      itemCount: keys.length,
-      gridDelegate:
-      SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-      itemBuilder: (context, index) {
-        final key = keys[index];
-        if (key == '') return Container();
-        return InkWell(
-          onTap: () {
-            key == '⌫' ? onDelete() : onKeyTap(key);
-          },
-          child: Container(
-            margin: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Text(
-                key,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+  Widget _buildKeypadButton(String label, {bool isDelete = false}) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(40),
+        onTap: () => isDelete ? onDelete() : onKeyTap(label),
+        child: Container(
+          width: 72,
+          height: 72,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 4,
+                offset: Offset(0, 2),
               ),
-            ),
+            ],
           ),
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
           child: Center(
-            child: Container(
-              padding: EdgeInsets.all(24),
-              margin: EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: Color(0xFF3B5EDF),
-                    child: Text("ai", style: TextStyle(color: Colors.white)),
-                  ),
-                  SizedBox(height: 16),
-                  Text("Canara Bank", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 8),
-                  Text("Enter your 5-digit PIN to continue"),
-                  SizedBox(height: 24),
-                  PinInput(enteredPin: enteredPin),
-                  SizedBox(height: 24),
-                  buildNumberPad(),
-                  SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: onLogin,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF3B5EDF),
-                      minimumSize: Size(double.infinity, 48),
-                    ),
-                    child: Text(
-                      "Login",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 19// Set text color to white
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 8),
-                  Text("Demo PIN: 12345", style: TextStyle(color: Colors.grey)),
-                ],
+            child: isDelete
+                ? Icon(Icons.backspace, color: Colors.grey)
+                : Text(
+              label,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w300,
+                color: Colors.black87,
               ),
             ),
           ),
@@ -157,4 +100,160 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  Widget _buildKeypad() {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildKeypadButton('1'),
+            _buildKeypadButton('2'),
+            _buildKeypadButton('3'),
+          ],
+        ),
+        SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildKeypadButton('4'),
+            _buildKeypadButton('5'),
+            _buildKeypadButton('6'),
+          ],
+        ),
+        SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildKeypadButton('7'),
+            _buildKeypadButton('8'),
+            _buildKeypadButton('9'),
+          ],
+        ),
+        SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Container(width: 72, height: 72), // Empty space
+            _buildKeypadButton('0'),
+            _buildKeypadButton('⌫', isDelete: true),
+          ],
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: lightBg,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Container(
+              constraints: BoxConstraints(maxWidth: 400),
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Logo Section
+                  Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 40,
+                        backgroundColor: primaryBlue,
+                        child: Text(
+                          "CB",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      Text(
+                        "Canara Bank",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        "Secure Banking",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 40),
+
+                  // PIN Entry Section
+                  Column(
+                    children: [
+                      Text(
+                        "Enter your 5-digit PIN",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      _buildPinIndicator(),
+                    ],
+                  ),
+
+                  SizedBox(height: 40),
+
+                  // Keypad
+                  _buildKeypad(),
+
+                  SizedBox(height: 32),
+
+                  // Login Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: enteredPin.length == 5 ? onLogin : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryBlue,
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        "Login",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 16),
+
+                  // Demo PIN Hint
+                  Text(
+                    "Demo PIN: 12345",
+                    style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
